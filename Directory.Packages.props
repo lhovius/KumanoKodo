@@ -4,8 +4,8 @@
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageVersion Include="Azure.Storage.Common" Version="12.24.0" />
     <PackageVersion Include="Azure.Core" Version="1.35.0" />
-    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-    <PackageVersion Include="Microsoft.Data.SQLite" Version="8.0.2" />
-    <PackageVersion Include="SQLite" Version="3.41.2" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Data.SQLite" Version="9.0.3" />
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
   </ItemGroup>
 </Project>

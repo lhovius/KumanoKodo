@@ -8,7 +8,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header and further dummy comment -->
+        <!-- Header -->
         <TextBlock Grid.Row="0" 
                    Text="Kumano Kodo Japanese Learning"
                    FontSize="24" 
