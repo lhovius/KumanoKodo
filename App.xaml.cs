@@ -1,4 +1,4 @@
-using System.Configuration;
+﻿using System.Configuration;
 using System.Data;
 using System.Windows;
 
@@ -24,7 +24,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
         // Initialize database
-        _ = DataAccess;
+        DataAccess.InitializeDatabase();
     }
 }
 

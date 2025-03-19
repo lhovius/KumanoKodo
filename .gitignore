@@ -2,6 +2,7 @@
 .vs/
 bin/
 obj/
+database/*.db
 *.user
 *.suo
 *.cache

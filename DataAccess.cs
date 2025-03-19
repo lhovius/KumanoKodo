@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.IO;
+using System.Windows;
 
 namespace KumanoKodo;
 
@@ -10,15 +11,17 @@ public class DataAccess
 
     public DataAccess()
     {
-        _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database", "kumano_kodo.db");
+        string projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+        _dbPath = Path.Combine(projectRoot, "database", "kumano_kodo.db");
         _connectionString = $"Data Source={_dbPath}";
         InitializeDatabase();
     }
 
-    private void InitializeDatabase()
+    public void InitializeDatabase()
     {
         // Ensure the database directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
+        //MessageBox.Show("Database Path: " + _connectionString);
 
         // Create database and tables if they don't exist
         using var connection = new SqliteConnection(_connectionString);
