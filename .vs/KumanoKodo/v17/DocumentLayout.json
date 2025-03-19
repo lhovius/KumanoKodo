@@ -1,10 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\Kumano Kodo MVP\\KumanoKodo\\",
+  "WorkspaceRootPath": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9B3D0791-BB0B-AEFC-E462-E043538CD49B}|KumanoKodo.csproj|c:\\users\\hrbri\\dropbox\\linda persoonlijk\\data science\\cursor ai\\kumano kodo mvp\\kumanokodo\\kumanokodo.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{9B3D0791-BB0B-AEFC-E462-E043538CD49B}|KumanoKodo.csproj|solutionrelative:kumanokodo.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\MainWindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MainWindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\KumanoKodo.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:KumanoKodo.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,12 +31,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-03-19T17:39:47.111Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "KumanoKodo.csproj",
-              "DocumentMoniker": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\Kumano Kodo MVP\\KumanoKodo\\KumanoKodo.csproj",
+              "DocumentMoniker": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\KumanoKodo.csproj",
               "RelativeDocumentMoniker": "KumanoKodo.csproj",
-              "ToolTip": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\Kumano Kodo MVP\\KumanoKodo\\KumanoKodo.csproj",
+              "ToolTip": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\KumanoKodo.csproj",
               "RelativeToolTip": "KumanoKodo.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-03-19T14:54:01.371Z",
               "EditorCaption": ""

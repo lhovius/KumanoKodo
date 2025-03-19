@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "sFN1QeWGKxM=",
+  "dgSpecHash": "5UAXWLQE1Yc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\Kumano Kodo MVP\\KumanoKodo\\KumanoKodo.csproj",
+  "projectFilePath": "C:\\Users\\hrbri\\Dropbox\\Linda persoonlijk\\Data Science\\Cursor AI\\KumanoKodo\\KumanoKodo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hrbri\\.nuget\\packages\\azure.core\\1.0.0\\azure.core.1.0.0.nupkg.sha512",
     "C:\\Users\\hrbri\\.nuget\\packages\\azure.storage.blobs\\12.0.0\\azure.storage.blobs.12.0.0.nupkg.sha512",
