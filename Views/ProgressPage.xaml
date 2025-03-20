@@ -35,7 +35,11 @@
                 <TextBlock Text="Learning Progress" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
                 
                 <!-- Progress Map -->
-                <Image Source="{Binding ProgressMapUrl}" MaxHeight="300" Stretch="Uniform" Margin="0,0,0,20"/>
+                <Image Source="{Binding ProgressMapUrl}" 
+                       MaxHeight="300" 
+                       Stretch="Uniform" 
+                       Margin="0,0,0,20"
+                       Visibility="{Binding ProgressMapUrl, Converter={StaticResource NullToVisibilityConverter}}"/>
                 
                 <!-- Summary Statistics -->
                 <Grid Margin="0,0,0,20">

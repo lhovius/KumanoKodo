@@ -128,24 +128,24 @@ namespace KumanoKodo.ViewModels
                 IsLoading = false;
             }
         }
+    }
 
-        partial class LessonItem
-        {
-            public int Id { get; set; }
-            public string Title { get; set; }
-            public string Description { get; set; }
-            public string ImageUrl { get; set; }
-            public string AudioUrl { get; set; }
-            public bool IsCompleted { get; set; }
-        }
+    public class LessonItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public string AudioUrl { get; set; }
+        public bool IsCompleted { get; set; }
+    }
 
-        partial class VocabularyItem
-        {
-            public int Id { get; set; }
-            public string Word { get; set; }
-            public string Meaning { get; set; }
-            public string ImageUrl { get; set; }
-            public string AudioUrl { get; set; }
-        }
+    public class VocabularyItem
+    {
+        public int Id { get; set; }
+        public string Word { get; set; }
+        public string Meaning { get; set; }
+        public string ImageUrl { get; set; }
+        public string AudioUrl { get; set; }
     }
 } 

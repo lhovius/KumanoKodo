@@ -13,10 +13,10 @@ namespace KumanoKodo.ViewModels
         private readonly int _userId;
 
         [ObservableProperty]
-        private ObservableCollection<LessonProgress> _lessonProgress;
+        private ObservableCollection<LessonProgressItem> _lessonProgress;
 
         [ObservableProperty]
-        private ObservableCollection<QuizProgress> _quizProgress;
+        private ObservableCollection<QuizProgressItem> _quizProgress;
 
         [ObservableProperty]
         private string _progressMapUrl;
@@ -44,8 +44,8 @@ namespace KumanoKodo.ViewModels
             _dataAccess = dataAccess;
             _blobService = blobService;
             _userId = userId;
-            _lessonProgress = new ObservableCollection<LessonProgress>();
-            _quizProgress = new ObservableCollection<QuizProgress>();
+            _lessonProgress = new ObservableCollection<LessonProgressItem>();
+            _quizProgress = new ObservableCollection<QuizProgressItem>();
             LoadProgressAsync().ConfigureAwait(false);
         }
 
@@ -62,7 +62,7 @@ namespace KumanoKodo.ViewModels
                 LessonProgress.Clear();
                 foreach (var lesson in lessons)
                 {
-                    LessonProgress.Add(new LessonProgress
+                    LessonProgress.Add(new LessonProgressItem
                     {
                         LessonId = lesson.LessonId,
                         Title = lesson.Title,
@@ -76,7 +76,7 @@ namespace KumanoKodo.ViewModels
                 QuizProgress.Clear();
                 foreach (var quiz in quizzes)
                 {
-                    QuizProgress.Add(new QuizProgress
+                    QuizProgress.Add(new QuizProgressItem
                     {
                         QuizId = quiz.QuizId,
                         LastAttempted = quiz.LastAttempted,
@@ -112,22 +112,22 @@ namespace KumanoKodo.ViewModels
         {
             await LoadProgressAsync();
         }
+    }
 
-        partial class LessonProgress
-        {
-            public int LessonId { get; set; }
-            public string Title { get; set; }
-            public DateTime? CompletedDate { get; set; }
-            public bool IsCompleted { get; set; }
-        }
+    public class LessonProgressItem
+    {
+        public int LessonId { get; set; }
+        public string Title { get; set; }
+        public DateTime? CompletedDate { get; set; }
+        public bool IsCompleted { get; set; }
+    }
 
-        partial class QuizProgress
-        {
-            public int QuizId { get; set; }
-            public DateTime LastAttempted { get; set; }
-            public int CorrectAttempts { get; set; }
-            public int IncorrectAttempts { get; set; }
-            public DateTime NextReviewDate { get; set; }
-        }
+    public class QuizProgressItem
+    {
+        public int QuizId { get; set; }
+        public DateTime LastAttempted { get; set; }
+        public int CorrectAttempts { get; set; }
+        public int IncorrectAttempts { get; set; }
+        public DateTime NextReviewDate { get; set; }
     }
 } 

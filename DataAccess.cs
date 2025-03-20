@@ -235,6 +235,149 @@ public class DataAccess
 
         await command.ExecuteNonQueryAsync();
     }
+
+    public async Task<List<LessonData>> GetLessonsAsync(int userId)
+    {
+        var lessons = new List<LessonData>();
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT l.*, COALESCE(up.Completed, 0) as IsCompleted
+            FROM Lessons l
+            LEFT JOIN UserProgress up ON l.Id = up.LessonId AND up.UserId = @UserId
+            ORDER BY l.Id";
+        command.Parameters.AddWithValue("@UserId", userId);
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            lessons.Add(new LessonData
+            {
+                Id = reader.GetInt32(0),
+                Title = reader.GetString(1),
+                Description = reader.GetString(2),
+                ImageUrl = reader.IsDBNull(3) ? null : reader.GetString(3),
+                AudioUrl = reader.IsDBNull(4) ? null : reader.GetString(4),
+                IsCompleted = reader.GetBoolean(5)
+            });
+        }
+
+        return lessons;
+    }
+
+    public async Task<List<VocabularyData>> GetVocabularyAsync(int lessonId)
+    {
+        var vocabulary = new List<VocabularyData>();
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT Id, Word, Meaning, ImageUrl, AudioUrl
+            FROM Vocabulary
+            WHERE LessonId = @LessonId
+            ORDER BY Id";
+        command.Parameters.AddWithValue("@LessonId", lessonId);
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            vocabulary.Add(new VocabularyData
+            {
+                Id = reader.GetInt32(0),
+                Word = reader.GetString(1),
+                Meaning = reader.GetString(2),
+                ImageUrl = reader.IsDBNull(3) ? null : reader.GetString(3),
+                AudioUrl = reader.IsDBNull(4) ? null : reader.GetString(4)
+            });
+        }
+
+        return vocabulary;
+    }
+
+    public async Task MarkLessonCompletedAsync(int userId, int lessonId)
+    {
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO UserProgress (UserId, LessonId, Completed)
+            VALUES (@UserId, @LessonId, 1)
+            ON CONFLICT(UserId, LessonId) DO UPDATE SET
+                Completed = 1";
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@LessonId", lessonId);
+
+        await command.ExecuteNonQueryAsync();
+    }
+
+    public async Task<List<LessonProgressData>> GetLessonProgressAsync(int userId)
+    {
+        var progress = new List<LessonProgressData>();
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT l.Id, l.Title, up.Completed, up.CompletedDate
+            FROM Lessons l
+            LEFT JOIN UserProgress up ON l.Id = up.LessonId AND up.UserId = @UserId
+            ORDER BY l.Id";
+        command.Parameters.AddWithValue("@UserId", userId);
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            progress.Add(new LessonProgressData
+            {
+                LessonId = reader.GetInt32(0),
+                Title = reader.GetString(1),
+                IsCompleted = reader.GetBoolean(2),
+                CompletedDate = reader.IsDBNull(3) ? null : reader.GetDateTime(3)
+            });
+        }
+
+        return progress;
+    }
+
+    public async Task<List<QuizProgressData>> GetQuizProgressAsync(int userId)
+    {
+        var progress = new List<QuizProgressData>();
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT 
+                qp.QuizId,
+                qp.LastAttempted,
+                COUNT(CASE WHEN qp.Correct = 1 THEN 1 END) as CorrectAttempts,
+                COUNT(CASE WHEN qp.Correct = 0 THEN 1 END) as IncorrectAttempts,
+                MAX(qp.NextReviewDate) as NextReviewDate
+            FROM QuizProgress qp
+            WHERE qp.UserId = @UserId
+            GROUP BY qp.QuizId
+            ORDER BY qp.QuizId";
+        command.Parameters.AddWithValue("@UserId", userId);
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            progress.Add(new QuizProgressData
+            {
+                QuizId = reader.GetInt32(0),
+                LastAttempted = reader.GetDateTime(1),
+                CorrectAttempts = reader.GetInt32(2),
+                IncorrectAttempts = reader.GetInt32(3),
+                NextReviewDate = reader.GetDateTime(4)
+            });
+        }
+
+        return progress;
+    }
 }
 
 public class QuizQuestion
@@ -250,4 +393,40 @@ public class QuizQuestion
     public int Difficulty { get; set; }
     public int IncorrectAttempts { get; set; }
     public DateTime? NextReviewDate { get; set; }
+}
+
+public class LessonData
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public string? AudioUrl { get; set; }
+    public bool IsCompleted { get; set; }
+}
+
+public class VocabularyData
+{
+    public int Id { get; set; }
+    public string Word { get; set; } = string.Empty;
+    public string Meaning { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public string? AudioUrl { get; set; }
+}
+
+public class LessonProgressData
+{
+    public int LessonId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public bool IsCompleted { get; set; }
+    public DateTime? CompletedDate { get; set; }
+}
+
+public class QuizProgressData
+{
+    public int QuizId { get; set; }
+    public DateTime LastAttempted { get; set; }
+    public int CorrectAttempts { get; set; }
+    public int IncorrectAttempts { get; set; }
+    public DateTime NextReviewDate { get; set; }
 } 
