@@ -48,9 +48,11 @@ public class DataAccess
         {
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Lessons (
-                    Id INTEGER PRIMARY KEY,
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Title TEXT NOT NULL,
-                    Description TEXT
+                    Description TEXT,
+                    ImageUrl TEXT,
+                    AudioUrl TEXT
                 )";
             command.ExecuteNonQuery();
         }
@@ -60,11 +62,13 @@ public class DataAccess
         {
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Vocabulary (
-                    Id INTEGER PRIMARY KEY,
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Word TEXT NOT NULL,
                     Meaning TEXT NOT NULL,
                     LessonId INTEGER,
-                    FOREIGN KEY(LessonId) REFERENCES Lessons(Id)
+                    ImageUrl TEXT,
+                    AudioUrl TEXT,
+                    FOREIGN KEY (LessonId) REFERENCES Lessons(Id)
                 )";
             command.ExecuteNonQuery();
         }

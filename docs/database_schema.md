@@ -21,6 +21,8 @@ erDiagram
         int Id PK
         string Title
         string Description
+        string ImageUrl
+        string AudioUrl
     }
 
     Vocabulary {
@@ -28,6 +30,8 @@ erDiagram
         string Word
         string Meaning
         int LessonId FK
+        string ImageUrl
+        string AudioUrl
     }
 
     UserProgress {
@@ -69,9 +73,13 @@ Stores user information for multi-user support.
 
 ### Lessons
 Contains the main learning content organized into lessons.
+- `ImageUrl`: URL to lesson image in Azure Blob Storage
+- `AudioUrl`: URL to lesson audio in Azure Blob Storage
 
 ### Vocabulary
 Stores Japanese words and their meanings, linked to specific lessons.
+- `ImageUrl`: URL to vocabulary image in Azure Blob Storage
+- `AudioUrl`: URL to vocabulary audio in Azure Blob Storage
 
 ### UserProgress
 Tracks user completion status for each lesson.
@@ -105,6 +113,30 @@ Implements spaced repetition by tracking:
 
 6. Quizzes to QuizProgress: One-to-many
    - Each quiz can have multiple attempt records
+
+## Media Storage
+
+The application uses Azure Blob Storage for media assets:
+
+### File Organization
+- Lesson media: `lessons/{lessonId}/`
+  - `image.jpg`: Lesson illustration
+  - `audio.mp3`: Lesson audio content
+- Vocabulary media: `vocabulary/{wordId}/`
+  - `image.jpg`: Word illustration
+  - `audio.mp3`: Word pronunciation
+
+### Benefits
+- Reduced database size
+- Efficient media delivery
+- CDN support
+- Scalable storage
+
+### Implementation
+- URLs stored in database
+- Files stored in Azure Blob Storage
+- Automatic content type detection
+- Secure access control
 
 ## Spaced Repetition Implementation
 
