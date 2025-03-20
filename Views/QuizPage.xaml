@@ -1,0 +1,98 @@
+<Page x:Class="KumanoKodo.Views.QuizPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:vm="clr-namespace:KumanoKodo.ViewModels"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="QuizPage">
+
+    <Page.DataContext>
+        <vm:QuizViewModel/>
+    </Page.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Score and Progress -->
+        <StackPanel Grid.Row="0" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="20">
+            <TextBlock Text="Score: " 
+                       FontWeight="Bold"/>
+            <TextBlock Text="{Binding Score}"/>
+            <TextBlock Text=" / " 
+                       Margin="2,0"/>
+            <TextBlock Text="{Binding TotalQuestions}"/>
+        </StackPanel>
+
+        <!-- Question and Answers -->
+        <Grid Grid.Row="1" 
+              Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Question -->
+            <TextBlock Text="{Binding CurrentQuestion}" 
+                       FontSize="20" 
+                       TextWrapping="Wrap" 
+                       Margin="0,0,0,20"/>
+
+            <!-- Answer Buttons -->
+            <ItemsControl Grid.Row="1" 
+                         ItemsSource="{Binding Answers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding}"
+                                Command="{Binding DataContext.SelectAnswerCommand, 
+                                          RelativeSource={RelativeSource AncestorType=Page}}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource Self}, 
+                                          Converter={StaticResource IndexConverter}}"
+                                Style="{StaticResource AnswerButtonStyle}"
+                                IsEnabled="{Binding DataContext.IsAnswerSelected, 
+                                          RelativeSource={RelativeSource AncestorType=Page}, 
+                                          Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                Background="{Binding DataContext.SelectedAnswerIndex, 
+                                          RelativeSource={RelativeSource AncestorType=Page}, 
+                                          Converter={StaticResource AnswerButtonBackgroundConverter}}"
+                                Margin="0,5"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Feedback Message -->
+            <TextBlock Text="{Binding FeedbackMessage}" 
+                       Foreground="{Binding IsCorrect, 
+                                          Converter={StaticResource BooleanToColorConverter}}"
+                       FontSize="16" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Bottom"/>
+        </Grid>
+
+        <!-- Navigation -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="20">
+            <Button Content="Next Question" 
+                    Command="{Binding NextQuestionCommand}"
+                    Style="{StaticResource NavigationButtonStyle}"
+                    IsEnabled="{Binding IsAnswerSelected}"
+                    Margin="0,0,10,0"/>
+            
+            <Button Content="Restart Quiz" 
+                    Command="{Binding RestartQuizCommand}"
+                    Style="{StaticResource NavigationButtonStyle}"
+                    Visibility="{Binding IsQuizComplete, 
+                                       Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
+    </Grid>
+</Page> 
