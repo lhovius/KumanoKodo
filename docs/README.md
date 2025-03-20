@@ -1,0 +1,392 @@
+# Kumano Kodo Japanese Learning Application
+
+A WPF application for learning Japanese through the context of the Kumano Kodo pilgrimage routes.
+
+## Project Structure
+
+```
+KumanoKodo/
+├── database/               # SQLite database files
+├── docs/                  # Documentation
+├── Views/                 # WPF pages and views
+│   ├── HomePage.xaml      # Welcome and introduction
+│   ├── LessonsPage.xaml   # Lesson selection and content
+│   ├── QuizPage.xaml      # Interactive quiz interface
+│   └── ProgressPage.xaml  # Learning progress tracking
+├── ViewModels/            # MVVM view models
+│   ├── MainViewModel.cs   # Main window logic
+│   ├── LessonsViewModel.cs # Lesson management
+│   ├── QuizViewModel.cs   # Quiz interaction
+│   └── ProgressViewModel.cs # Progress tracking
+├── Models/                # Data models
+├── Services/              # External services
+│   └── AzureBlobService.cs # Azure Blob Storage integration
+├── Converters/            # WPF value converters
+└── DataAccess.cs          # Database access layer
+└── Directory.Packages.props # Central package version management
+```
+
+## Database Schema
+
+The application uses SQLite with the following tables:
+
+### Users
+- `Id` (INTEGER PRIMARY KEY)
+- `Username` (TEXT NOT NULL UNIQUE)
+- `CreatedAt` (DATETIME)
+
+### Lessons
+- `Id` (INTEGER PRIMARY KEY)
+- `Title` (TEXT NOT NULL)
+- `Description` (TEXT)
+- `ImageUrl` (TEXT) - URL to lesson image in Azure Blob Storage
+- `AudioUrl` (TEXT) - URL to lesson audio in Azure Blob Storage
+
+### Vocabulary
+- `Id` (INTEGER PRIMARY KEY)
+- `Word` (TEXT NOT NULL)
+- `Meaning` (TEXT NOT NULL)
+- `LessonId` (INTEGER, FOREIGN KEY)
+- `ImageUrl` (TEXT) - URL to vocabulary image in Azure Blob Storage
+- `AudioUrl` (TEXT) - URL to vocabulary audio in Azure Blob Storage
+
+### UserProgress
+- `Id` (INTEGER PRIMARY KEY)
+- `UserId` (INTEGER, FOREIGN KEY)
+- `LessonId` (INTEGER, FOREIGN KEY)
+- `Completed` (BOOLEAN)
+
+### Quizzes
+- `Id` (INTEGER PRIMARY KEY)
+- `LessonId` (INTEGER, FOREIGN KEY)
+- `Question` (TEXT NOT NULL)
+- `Answer1-4` (TEXT NOT NULL)
+- `CorrectAnswer` (INTEGER)
+- `LastReviewed` (DATETIME)
+- `ReviewCount` (INTEGER)
+- `Difficulty` (INTEGER)
+
+### QuizProgress
+- `Id` (INTEGER PRIMARY KEY)
+- `UserId` (INTEGER, FOREIGN KEY)
+- `QuizId` (INTEGER, FOREIGN KEY)
+- `LastAttempted` (DATETIME)
+- `Correct` (BOOLEAN)
+- `IncorrectAttempts` (INTEGER)
+- `NextReviewDate` (DATETIME)
+
+## Azure Storage Configuration
+
+The application uses Azure Blob Storage with SAS token authentication for secure media storage.
+
+### Development Setup
+
+1. Create an `appsettings.json` file in the project root:
+   ```json
+   {
+     "AzureStorage": {
+       "BlobServiceUrl": "https://your-storage-account.blob.core.windows.net",
+       "SasToken": "your-sas-token-here"
+     }
+   }
+   ```
+
+2. Copy `appsettings.example.json` to `appsettings.json` and update with your values.
+
+### Production Setup
+
+In production, use environment variables:
+```powershell
+$env:AZURE_STORAGE_BLOB_SERVICE_URL="https://your-storage-account.blob.core.windows.net"
+$env:AZURE_STORAGE_SAS_TOKEN="your-sas-token-here"
+```
+
+### Generating SAS Tokens
+
+1. In Azure Portal:
+   - Navigate to your storage account
+   - Select "Shared access signature"
+   - Configure permissions:
+     - Read, Write, List
+     - Container-level access
+     - Set appropriate expiry time
+   - Generate SAS token
+
+2. Security Best Practices:
+   - Use container-level SAS tokens
+   - Set appropriate expiry times
+   - Limit permissions to minimum required
+   - Rotate tokens regularly
+   - Never commit tokens to source control
+
+### Media Storage Structure
+
+The application uses a flat file structure in Azure Blob Storage for better compatibility:
+
+1. Container: `kumano-assets`
+   - Stores all media files in a flat structure
+   - Organized by content type and ID
+
+2. File Naming Convention:
+   - Format: `{category}_{id}_{type}.{extension}`
+   - Components:
+     - `category`: lesson, vocabulary, quiz, or progress
+     - `id`: corresponding unique identifier
+     - `type`: image, audio, video, or document
+     - `extension`: file format (jpg, mp3, etc.)
+   - Examples:
+     - Lesson Media:
+       - `lesson_12_image.jpg`
+       - `lesson_12_audio.mp3`
+     - Vocabulary Media:
+       - `vocabulary_5_image.jpg`
+       - `vocabulary_5_audio.mp3`
+     - Quiz Media:
+       - `quiz_7_image.jpg`
+       - `quiz_7_audio.mp3`
+     - Progress Visualization:
+       - `progress_3_map.jpg`
+
+3. Supported Media Types:
+   - Images:
+     - JPEG (.jpg, .jpeg)
+     - PNG (.png)
+     - GIF (.gif)
+     - WebP (.webp)
+     - SVG (.svg)
+   - Audio:
+     - MP3 (.mp3)
+     - WAV (.wav)
+     - OGG (.ogg)
+     - M4A (.m4a)
+   - Video:
+     - MP4 (.mp4)
+     - WebM (.webm)
+     - MOV (.mov)
+   - Documents:
+     - PDF (.pdf)
+     - Text (.txt)
+     - Markdown (.md)
+
+4. Features:
+   - Flat file structure for better compatibility
+   - Dynamic MIME type detection
+   - Automatic content type assignment
+   - Extensible media type support
+   - Secure file storage
+   - CDN integration support
+   - Efficient media delivery
+   - Reduced local storage usage
+   - Support for visual and audio quizzes
+   - Progress visualization along the Kumano Kodo route
+
+5. Configuration:
+   - SAS token authentication
+   - Container created automatically
+   - Content types set automatically
+   - URLs stored in database for quick access
+
+### Adding New Media
+
+1. Prepare Media Files:
+   - Optimize images for web delivery
+   - Compress audio files appropriately
+   - Follow the naming convention: `{category}_{id}_{type}.{extension}`
+   - Use supported file formats
+
+2. Upload Process:
+   - Use AzureBlobService methods for each media type
+   - Store returned URLs in appropriate database tables
+   - Verify media accessibility
+   - Check MIME type assignment
+
+3. Database Updates:
+   - Update Lessons table for lesson media
+   - Update Vocabulary table for word media
+   - Update Quizzes table for quiz media
+   - Update UserProgress table for progress visualization
+
+4. Adding New Media Types:
+   - Add new MIME type mapping in AzureBlobService
+   - Update documentation with new format
+   - Test with sample files
+   - Verify browser compatibility
+
+## UI Navigation
+
+The application follows a hierarchical navigation structure:
+
+1. Main Window
+   - Home Page
+   - Lessons Page
+   - Quiz Page
+   - Progress Page
+
+2. Quiz System
+   - Question Display
+   - Answer Selection
+   - Progress Tracking
+   - Spaced Repetition
+
+## Spaced Repetition System
+
+The quiz system implements a sophisticated spaced repetition algorithm:
+
+1. Question Priority:
+   - Never attempted questions (priority 0)
+   - Questions due for review (NextReviewDate <= CURRENT_TIMESTAMP)
+   - Correctly answered questions
+   - Incorrectly answered questions
+
+2. Review Intervals:
+   - Correct answers: Exponential growth (2^n days)
+     - First correct: 1 day
+     - Second correct: 2 days
+     - Third correct: 4 days
+     - Fourth correct: 8 days
+     - And so on...
+   - Incorrect answers: 1-hour interval
+   - Based on incorrect attempt count
+
+3. Progress Tracking:
+   - Tracks incorrect attempts
+   - Shows next review date
+   - Displays attempt history
+   - Updates review intervals dynamically
+
+4. Question Selection Logic:
+   ```sql
+   CASE 
+       WHEN qp.LastAttempted IS NULL THEN 0
+       WHEN qp.NextReviewDate <= CURRENT_TIMESTAMP THEN 1
+       WHEN qp.Correct = 1 THEN 2
+       ELSE 3
+   END
+   ```
+   This ensures:
+   - New questions appear first
+   - Due questions are prioritized
+   - Correct questions are delayed
+   - Incorrect questions are reviewed more frequently
+
+## Getting Started
+
+1. Prerequisites:
+   - .NET 8.0 SDK or later
+   - Visual Studio 2022 or later with .NET 8.0 workload
+
+2. Clone the repository
+
+3. Open the solution in Visual Studio
+
+4. Install required NuGet packages:
+   - Azure.Storage.Blobs (12.19.1)
+   - Microsoft.Data.Sqlite (8.0.2)
+   - Microsoft.Extensions.Configuration (8.0.0)
+   - Microsoft.Extensions.Configuration.Binder (8.0.4)
+   - Microsoft.Extensions.Configuration.Json (8.0.0)
+   - Microsoft.Extensions.Configuration.EnvironmentVariables (8.0.0)
+   - Microsoft.Extensions.DependencyInjection (8.0.0)
+
+5. Configure Azure Blob Storage:
+   - Add connection string to app settings
+   - Create container named 'kumano-assets'
+
+6. Build and run the application:
+   ```powershell
+   dotnet restore
+   dotnet clean
+   dotnet build
+   dotnet run
+   ```
+
+7. The database will be automatically initialized in the `database` folder
+
+## Development Environment
+
+### Required Tools
+- .NET 8.0 SDK
+- Visual Studio 2022 or later
+- Azure Storage Explorer (optional, for managing blob storage)
+
+### Project Configuration
+- Target Framework: .NET 8.0
+- WPF Application
+- Nullable Reference Types enabled
+- Implicit Usings enabled
+
+### Key Features
+- Modern .NET 8.0 features and improvements
+- WPF with MVVM architecture
+- SQLite database with Entity Framework Core
+- Azure Blob Storage integration
+- Configuration management with Microsoft.Extensions.Configuration
+- Dependency injection support
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## ViewModels
+
+### LessonsViewModel
+- Manages lesson content and vocabulary
+- Properties:
+  - `Lessons`: Collection of available lessons
+  - `SelectedLesson`: Currently selected lesson
+  - `VocabularyList`: Words for current lesson
+  - `IsLoading`: Loading state indicator
+  - `StatusMessage`: User feedback
+- Commands:
+  - `LoadLessonsCommand`: Refresh lesson list
+  - `LoadVocabularyCommand`: Load words for selected lesson
+  - `MarkLessonCompletedCommand`: Update lesson progress
+
+### ProgressViewModel
+- Tracks user learning progress
+- Properties:
+  - `LessonProgress`: Completed lesson history
+  - `QuizProgress`: Quiz attempt history
+  - `ProgressMapUrl`: Visual progress representation
+  - `CompletedLessons`: Number of finished lessons
+  - `TotalLessons`: Total available lessons
+  - `CorrectQuizzes`: Successful quiz attempts
+  - `TotalQuizzes`: Total quiz attempts
+- Commands:
+  - `LoadProgressCommand`: Initialize progress data
+  - `RefreshProgressCommand`: Update progress display
+
+## Package Management
+
+The project uses centralized package version management through `Directory.Packages.props`:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+</Project>
+```
+
+To verify package versions:
+```powershell
+dotnet list package
+``` 

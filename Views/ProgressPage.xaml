@@ -3,63 +3,135 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:KumanoKodo.Views"
+      xmlns:vm="clr-namespace:KumanoKodo.ViewModels"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="ProgressPage">
+      d:DataContext="{d:DesignInstance Type=vm:ProgressViewModel}"
+      Title="Progress">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Your Progress" 
-                   FontSize="24" 
-                   FontWeight="Bold" 
-                   Margin="20,20,20,10"/>
+        <!-- Status Bar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <TextBlock Text="{Binding StatusMessage}" Margin="0,0,10,0"/>
+            <ProgressBar IsIndeterminate="True" Width="100" Height="2" 
+                       Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
 
-        <Grid Grid.Row="1" Margin="20">
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Placeholder for the map -->
-            <Border Grid.Column="0" 
-                    Background="#F5F5F5" 
-                    BorderBrush="#DDDDDD" 
-                    BorderThickness="1">
-                <TextBlock Text="Kumano Kodo Map will be displayed here" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"/>
-            </Border>
+            <!-- Left Panel - Progress Summary -->
+            <StackPanel Grid.Column="0" Margin="10">
+                <TextBlock Text="Learning Progress" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+                
+                <!-- Progress Map -->
+                <Image Source="{Binding ProgressMapUrl}" 
+                       MaxHeight="300" 
+                       Stretch="Uniform" 
+                       Margin="0,0,0,20"
+                       Visibility="{Binding ProgressMapUrl, Converter={StaticResource NullToVisibilityConverter}}"/>
+                
+                <!-- Summary Statistics -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-            <!-- Progress summary -->
-            <StackPanel Grid.Column="1" 
-                        Margin="20,0,0,0" 
-                        MinWidth="200">
-                <TextBlock Text="Progress Summary" 
-                           FontSize="18" 
-                           FontWeight="Bold" 
-                           Margin="0,0,0,10"/>
-                
-                <TextBlock Text="Completed Lessons:" 
-                           FontWeight="Bold"/>
-                <TextBlock Text="{Binding CompletedLessonsCount}" 
-                           Margin="0,0,0,10"/>
-                
-                <TextBlock Text="Total Lessons:" 
-                           FontWeight="Bold"/>
-                <TextBlock Text="{Binding TotalLessonsCount}" 
-                           Margin="0,0,0,20"/>
-                
-                <ProgressBar Value="{Binding ProgressPercentage}" 
-                            Height="20" 
-                            Margin="0,0,0,10"/>
-                
-                <TextBlock Text="{Binding ProgressPercentage, StringFormat={}{0}% Complete}" 
-                           HorizontalAlignment="Center"/>
+                    <!-- Lessons Progress -->
+                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Lessons Completed" FontWeight="Bold"/>
+                        <TextBlock>
+                            <Run Text="{Binding CompletedLessons}"/>
+                            <Run Text="/"/>
+                            <Run Text="{Binding TotalLessons}"/>
+                        </TextBlock>
+                        <ProgressBar Value="{Binding CompletedLessons}" Maximum="{Binding TotalLessons}" Height="4" Margin="0,5"/>
+                    </StackPanel>
+
+                    <!-- Quiz Progress -->
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Quiz Performance" FontWeight="Bold"/>
+                        <TextBlock>
+                            <Run Text="{Binding CorrectQuizzes}"/>
+                            <Run Text="/"/>
+                            <Run Text="{Binding TotalQuizzes}"/>
+                        </TextBlock>
+                        <ProgressBar Value="{Binding CorrectQuizzes}" Maximum="{Binding TotalQuizzes}" Height="4" Margin="0,5"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
+
+            <!-- Right Panel - Detailed Progress -->
+            <Grid Grid.Column="1" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Lesson Progress List -->
+                <TextBlock Grid.Row="0" Text="Lesson History" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+                <ListView Grid.Row="1" ItemsSource="{Binding LessonProgress}" Margin="0,0,0,20">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Title}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding CompletedDate, StringFormat=d}" Margin="10,0,0,0"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Quiz Progress List -->
+                <TextBlock Grid.Row="2" Text="Quiz History" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+                <ListView Grid.Row="3" ItemsSource="{Binding QuizProgress}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0">
+                                    <Run Text="Quiz #"/>
+                                    <Run Text="{Binding QuizId}"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="1" Margin="10,0">
+                                    <Run Text="{Binding CorrectAttempts}"/>
+                                    <Run Text="/"/>
+                                    <Run Text="{Binding IncorrectAttempts}"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="2" Text="{Binding NextReviewDate, StringFormat=d}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
         </Grid>
+
+        <!-- Action Bar -->
+        <Button Grid.Row="2" Content="Refresh" Command="{Binding RefreshProgressCommand}"
+                HorizontalAlignment="Right" Margin="10"/>
     </Grid>
 </Page> 
