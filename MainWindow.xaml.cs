@@ -20,4 +20,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
+
+    private void QuizButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainFrame.Navigate(new QuizPage());
+    }
 }
