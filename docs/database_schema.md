@@ -104,4 +104,35 @@ Implements spaced repetition by tracking:
    - Each lesson can have multiple user progress records
 
 6. Quizzes to QuizProgress: One-to-many
-   - Each quiz can have multiple attempt records 
+   - Each quiz can have multiple attempt records
+
+## Spaced Repetition Implementation
+
+The quiz system uses a sophisticated spaced repetition algorithm implemented in the database:
+
+### Question Selection Logic
+```sql
+CASE 
+    WHEN qp.LastAttempted IS NULL THEN 0
+    WHEN qp.NextReviewDate <= CURRENT_TIMESTAMP THEN 1
+    WHEN qp.Correct = 1 THEN 2
+    ELSE 3
+END
+```
+
+### Review Intervals
+- Correct answers: Exponential growth (2^n days)
+  - First correct: 1 day
+  - Second correct: 2 days
+  - Third correct: 4 days
+  - Fourth correct: 8 days
+  - And so on...
+- Incorrect answers: 1-hour interval
+
+### Progress Tracking
+- `LastAttempted`: Records when the question was last answered
+- `Correct`: Boolean indicating if the last attempt was correct
+- `IncorrectAttempts`: Counter for failed attempts
+- `NextReviewDate`: Calculated based on performance
+  - For correct answers: LastAttempted + (2^ReviewCount) days
+  - For incorrect answers: LastAttempted + 1 hour 

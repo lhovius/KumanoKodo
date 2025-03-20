@@ -23,24 +23,29 @@
         <StackPanel Grid.Column="0" 
                     Background="#F5F5F5" 
                     Margin="0,0,1,0">
-            <Button Content="Home" 
+            <Button x:Name="HomeButton" Content="Home" 
                     Command="{Binding NavigateToHomeCommand}"
                     Style="{StaticResource NavigationButtonStyle}"
                     Margin="10,20,10,10"/>
             
-            <Button Content="Lessons" 
+            <Button x:Name="LessonsButton" Content="Lessons" 
                     Command="{Binding NavigateToLessonsCommand}"
                     Style="{StaticResource NavigationButtonStyle}"
                     Margin="10,10"/>
             
-            <Button Content="Progress" 
+            <Button x:Name="QuizButton" Content="Quiz" 
+                    Command="{Binding NavigateToQuizCommand}"
+                    Style="{StaticResource NavigationButtonStyle}"
+                    Margin="10,10"/>
+            
+            <Button x:Name="ProgressButton" Content="Progress" 
                     Command="{Binding NavigateToProgressCommand}"
                     Style="{StaticResource NavigationButtonStyle}"
                     Margin="10,10"/>
         </StackPanel>
 
         <!-- Content Frame -->
-        <Frame Grid.Column="1" 
+        <Frame x:Name="MainFrame" Grid.Column="1" 
                Content="{Binding CurrentPage}"
                NavigationUIVisibility="Hidden"/>
     </Grid>

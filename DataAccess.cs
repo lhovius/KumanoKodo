@@ -149,7 +149,7 @@ public class DataAccess
                         ORDER BY 
                             CASE 
                                 WHEN qp.LastAttempted IS NULL THEN 0
-                                WHEN qp.NextReviewDate > CURRENT_TIMESTAMP THEN 1
+                                WHEN qp.NextReviewDate <= CURRENT_TIMESTAMP THEN 1
                                 WHEN qp.Correct = 1 THEN 2
                                 ELSE 3
                             END,
@@ -217,7 +217,7 @@ public class DataAccess
                 Correct = @Correct,
                 IncorrectAttempts = IncorrectAttempts + CASE WHEN @Correct = 0 THEN 1 ELSE 0 END,
                 NextReviewDate = CASE 
-                    WHEN @Correct = 1 THEN datetime(@LastAttempted, '+' || (IncorrectAttempts + 1) || ' days')
+                    WHEN @Correct = 1 THEN datetime(@LastAttempted, '+' || (pow(2, ReviewCount)) || ' days')
                     ELSE datetime(@LastAttempted, '+1 hour')
                 END";
 

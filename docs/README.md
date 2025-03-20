@@ -9,6 +9,10 @@ KumanoKodo/
 ├── database/               # SQLite database files
 ├── docs/                  # Documentation
 ├── Views/                 # WPF pages and views
+│   ├── HomePage.xaml      # Welcome and introduction
+│   ├── LessonsPage.xaml   # Lesson selection and content
+│   ├── QuizPage.xaml      # Interactive quiz interface
+│   └── ProgressPage.xaml  # Learning progress tracking
 ├── ViewModels/            # MVVM view models
 ├── Converters/            # WPF value converters
 └── DataAccess.cs          # Database access layer
@@ -77,16 +81,21 @@ The application follows a hierarchical navigation structure:
 
 ## Spaced Repetition System
 
-The quiz system implements a spaced repetition algorithm:
+The quiz system implements a sophisticated spaced repetition algorithm:
 
 1. Question Priority:
-   - Never attempted questions
-   - Questions due for review
+   - Never attempted questions (priority 0)
+   - Questions due for review (NextReviewDate <= CURRENT_TIMESTAMP)
    - Correctly answered questions
    - Incorrectly answered questions
 
 2. Review Intervals:
-   - Correct answers: Increasing intervals (1 day, 2 days, etc.)
+   - Correct answers: Exponential growth (2^n days)
+     - First correct: 1 day
+     - Second correct: 2 days
+     - Third correct: 4 days
+     - Fourth correct: 8 days
+     - And so on...
    - Incorrect answers: 1-hour interval
    - Based on incorrect attempt count
 
@@ -94,6 +103,22 @@ The quiz system implements a spaced repetition algorithm:
    - Tracks incorrect attempts
    - Shows next review date
    - Displays attempt history
+   - Updates review intervals dynamically
+
+4. Question Selection Logic:
+   ```sql
+   CASE 
+       WHEN qp.LastAttempted IS NULL THEN 0
+       WHEN qp.NextReviewDate <= CURRENT_TIMESTAMP THEN 1
+       WHEN qp.Correct = 1 THEN 2
+       ELSE 3
+   END
+   ```
+   This ensures:
+   - New questions appear first
+   - Due questions are prioritized
+   - Correct questions are delayed
+   - Incorrect questions are reviewed more frequently
 
 ## Getting Started
 
