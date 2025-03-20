@@ -39,6 +39,7 @@ erDiagram
         int UserId FK
         int LessonId FK
         bool Completed
+        string ProgressImageUrl
     }
 
     Quizzes {
@@ -53,6 +54,8 @@ erDiagram
         datetime LastReviewed
         int ReviewCount
         int Difficulty
+        string ImageUrl
+        string AudioUrl
     }
 
     QuizProgress {
@@ -83,9 +86,12 @@ Stores Japanese words and their meanings, linked to specific lessons.
 
 ### UserProgress
 Tracks user completion status for each lesson.
+- `ProgressImageUrl`: URL to progress visualization image
 
 ### Quizzes
 Contains quiz questions and answers for each lesson.
+- `ImageUrl`: URL to quiz image (for visual questions)
+- `AudioUrl`: URL to quiz audio (for listening exercises)
 
 ### QuizProgress
 Implements spaced repetition by tracking:
@@ -116,27 +122,28 @@ Implements spaced repetition by tracking:
 
 ## Media Storage
 
-The application uses Azure Blob Storage for media assets:
+The application uses Azure Blob Storage for media assets with a flat file structure:
 
-### File Organization
-- Lesson media: `lessons/{lessonId}/`
-  - `image.jpg`: Lesson illustration
-  - `audio.mp3`: Lesson audio content
-- Vocabulary media: `vocabulary/{wordId}/`
-  - `image.jpg`: Word illustration
-  - `audio.mp3`: Word pronunciation
+### File Naming Convention
+- Lesson Media:
+  - `lessons_{lessonId}_image.jpg`
+  - `lessons_{lessonId}_audio.mp3`
+- Vocabulary Media:
+  - `vocabulary_{wordId}_image.jpg`
+  - `vocabulary_{wordId}_audio.mp3`
+- Quiz Media:
+  - `quizzes_{quizId}_image.jpg`
+  - `quizzes_{quizId}_audio.mp3`
+- Progress Visualization:
+  - `progress_{userId}.jpg`
 
-### Benefits
-- Reduced database size
-- Efficient media delivery
-- CDN support
-- Scalable storage
-
-### Implementation
-- URLs stored in database
-- Files stored in Azure Blob Storage
-- Automatic content type detection
-- Secure access control
+### Database Integration
+- URLs stored in appropriate tables
+- Media types supported:
+  - Images (JPEG)
+  - Audio (MP3)
+  - Progress maps (JPEG)
+- Efficient retrieval through indexed URLs
 
 ## Spaced Repetition Implementation
 

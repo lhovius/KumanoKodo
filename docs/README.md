@@ -114,32 +114,98 @@ $env:AZURE_STORAGE_SAS_TOKEN="your-sas-token-here"
    - Rotate tokens regularly
    - Never commit tokens to source control
 
-### File Organization
+### Media Storage Structure
 
-The application uses the following structure in Azure Blob Storage:
+The application uses a flat file structure in Azure Blob Storage for better compatibility:
 
 1. Container: `kumano-assets`
-   - Stores images and audio files
-   - Organized by lesson and vocabulary items
+   - Stores all media files in a flat structure
+   - Organized by content type and ID
 
-2. File Paths:
-   - Lesson media: `lessons/{lessonId}/`
-     - `image.jpg`: Lesson illustration
-     - `audio.mp3`: Lesson audio content
-   - Vocabulary media: `vocabulary/{wordId}/`
-     - `image.jpg`: Word illustration
-     - `audio.mp3`: Word pronunciation
+2. File Naming Convention:
+   - Format: `{category}_{id}_{type}.{extension}`
+   - Components:
+     - `category`: lesson, vocabulary, quiz, or progress
+     - `id`: corresponding unique identifier
+     - `type`: image, audio, video, or document
+     - `extension`: file format (jpg, mp3, etc.)
+   - Examples:
+     - Lesson Media:
+       - `lesson_12_image.jpg`
+       - `lesson_12_audio.mp3`
+     - Vocabulary Media:
+       - `vocabulary_5_image.jpg`
+       - `vocabulary_5_audio.mp3`
+     - Quiz Media:
+       - `quiz_7_image.jpg`
+       - `quiz_7_audio.mp3`
+     - Progress Visualization:
+       - `progress_3_map.jpg`
 
-3. Features:
+3. Supported Media Types:
+   - Images:
+     - JPEG (.jpg, .jpeg)
+     - PNG (.png)
+     - GIF (.gif)
+     - WebP (.webp)
+     - SVG (.svg)
+   - Audio:
+     - MP3 (.mp3)
+     - WAV (.wav)
+     - OGG (.ogg)
+     - M4A (.m4a)
+   - Video:
+     - MP4 (.mp4)
+     - WebM (.webm)
+     - MOV (.mov)
+   - Documents:
+     - PDF (.pdf)
+     - Text (.txt)
+     - Markdown (.md)
+
+4. Features:
+   - Flat file structure for better compatibility
+   - Dynamic MIME type detection
+   - Automatic content type assignment
+   - Extensible media type support
    - Secure file storage
    - CDN integration support
    - Efficient media delivery
    - Reduced local storage usage
+   - Support for visual and audio quizzes
+   - Progress visualization along the Kumano Kodo route
 
-4. Configuration:
+5. Configuration:
    - SAS token authentication
    - Container created automatically
    - Content types set automatically
+   - URLs stored in database for quick access
+
+### Adding New Media
+
+1. Prepare Media Files:
+   - Optimize images for web delivery
+   - Compress audio files appropriately
+   - Follow the naming convention: `{category}_{id}_{type}.{extension}`
+   - Use supported file formats
+
+2. Upload Process:
+   - Use AzureBlobService methods for each media type
+   - Store returned URLs in appropriate database tables
+   - Verify media accessibility
+   - Check MIME type assignment
+
+3. Database Updates:
+   - Update Lessons table for lesson media
+   - Update Vocabulary table for word media
+   - Update Quizzes table for quiz media
+   - Update UserProgress table for progress visualization
+
+4. Adding New Media Types:
+   - Add new MIME type mapping in AzureBlobService
+   - Update documentation with new format
+   - Test with sample files
+   - Verify browser compatibility
 
 ## UI Navigation
 

@@ -78,12 +78,13 @@ public class DataAccess
         {
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS UserProgress (
-                    Id INTEGER PRIMARY KEY,
-                    UserId INTEGER NOT NULL,
-                    LessonId INTEGER NOT NULL,
-                    Completed BOOLEAN NOT NULL DEFAULT 0,
-                    FOREIGN KEY(UserId) REFERENCES Users(Id),
-                    FOREIGN KEY(LessonId) REFERENCES Lessons(Id)
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    UserId INTEGER,
+                    LessonId INTEGER,
+                    Completed BOOLEAN,
+                    ProgressImageUrl TEXT,
+                    FOREIGN KEY (UserId) REFERENCES Users(Id),
+                    FOREIGN KEY (LessonId) REFERENCES Lessons(Id)
                 )";
             command.ExecuteNonQuery();
         }
@@ -93,18 +94,20 @@ public class DataAccess
         {
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Quizzes (
-                    Id INTEGER PRIMARY KEY,
-                    LessonId INTEGER NOT NULL,
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    LessonId INTEGER,
                     Question TEXT NOT NULL,
                     Answer1 TEXT NOT NULL,
                     Answer2 TEXT NOT NULL,
                     Answer3 TEXT NOT NULL,
                     Answer4 TEXT NOT NULL,
-                    CorrectAnswer INTEGER NOT NULL,
+                    CorrectAnswer INTEGER,
                     LastReviewed DATETIME,
-                    ReviewCount INTEGER DEFAULT 0,
-                    Difficulty INTEGER DEFAULT 0,
-                    FOREIGN KEY(LessonId) REFERENCES Lessons(Id)
+                    ReviewCount INTEGER,
+                    Difficulty INTEGER,
+                    ImageUrl TEXT,
+                    AudioUrl TEXT,
+                    FOREIGN KEY (LessonId) REFERENCES Lessons(Id)
                 )";
             command.ExecuteNonQuery();
         }
