@@ -6,115 +6,101 @@
       xmlns:local="clr-namespace:KumanoKodo.Views"
       xmlns:vm="clr-namespace:KumanoKodo.ViewModels"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="LessonsPage">
-
-    <Page.DataContext>
-        <vm:LessonsViewModel/>
-    </Page.DataContext>
+      d:DataContext="{d:DesignInstance Type=vm:LessonsViewModel}"
+      Title="Lessons">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <!-- Lessons List -->
-        <ListBox Grid.Column="0" 
-                 ItemsSource="{Binding Lessons}"
-                 SelectedItem="{Binding SelectedLesson}"
-                 Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding Title}" 
-                                 FontWeight="Bold" 
-                                 Margin="0,5"/>
-                        <TextBlock Text="{Binding Description}" 
-                                 TextWrapping="Wrap" 
-                                 Margin="0,5"/>
-                        <ProgressBar Height="2" 
-                                   Value="{Binding Progress}" 
-                                   Margin="0,5"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <!-- Status Bar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <TextBlock Text="{Binding StatusMessage}" Margin="0,0,10,0"/>
+            <ProgressBar IsIndeterminate="True" Width="100" Height="2" 
+                       Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
 
-        <!-- Lesson Content -->
-        <ScrollViewer Grid.Column="1" 
-                      Margin="10">
-            <StackPanel>
-                <TextBlock Text="{Binding SelectedLesson.Title}" 
-                         FontSize="24" 
-                         FontWeight="Bold" 
-                         Margin="0,0,0,10"/>
-                
-                <TextBlock Text="{Binding SelectedLesson.Description}" 
-                         TextWrapping="Wrap" 
-                         Margin="0,0,0,20"/>
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Lesson Image -->
-                <Image Source="{Binding SelectedLesson.ImageUrl}" 
-                       MaxHeight="300" 
-                       Stretch="Uniform" 
-                       Margin="0,0,0,20"/>
+            <!-- Lessons List -->
+            <ListBox Grid.Column="0" 
+                     ItemsSource="{Binding Lessons}"
+                     SelectedItem="{Binding SelectedLesson}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding ImageUrl}" Width="50" Height="50" Margin="0,0,10,0"/>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
+                                <TextBlock Text="✓ Completed" Foreground="Green"
+                                         Visibility="{Binding IsCompleted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
-                <!-- Lesson Audio -->
-                <MediaElement Source="{Binding SelectedLesson.AudioUrl}" 
-                            LoadedBehavior="Manual" 
-                            UnloadedBehavior="Stop"
-                            Margin="0,0,0,20"/>
+            <!-- Lesson Details -->
+            <Grid Grid.Column="1" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Lesson Header -->
+                <StackPanel Grid.Row="0" Visibility="{Binding SelectedLesson, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding SelectedLesson.Title}" FontSize="24" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding SelectedLesson.Description}" TextWrapping="Wrap" Margin="0,10"/>
+                </StackPanel>
+
+                <!-- Lesson Media -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10"
+                          Visibility="{Binding SelectedLesson, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Image Source="{Binding SelectedLesson.ImageUrl}" Width="200" Height="200" Margin="0,0,10,0"/>
+                    <MediaElement Source="{Binding SelectedLesson.AudioUrl}" LoadedBehavior="Manual"/>
+                </StackPanel>
 
                 <!-- Vocabulary List -->
-                <TextBlock Text="Vocabulary" 
-                         FontSize="20" 
-                         FontWeight="Bold" 
-                         Margin="0,0,0,10"/>
-                
-                <ItemsControl ItemsSource="{Binding SelectedLesson.Vocabulary}">
-                    <ItemsControl.ItemTemplate>
+                <ListView Grid.Row="2" ItemsSource="{Binding VocabularyList}"
+                         Visibility="{Binding SelectedLesson, Converter={StaticResource NullToVisibilityConverter}}">
+                    <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderBrush="#DDDDDD" 
-                                    BorderThickness="1" 
-                                    Margin="0,5" 
-                                    Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="{Binding Word}" 
-                                                 FontSize="18" 
-                                                 FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Meaning}" 
-                                                 TextWrapping="Wrap"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="1" 
-                                              Orientation="Horizontal">
-                                        <!-- Vocabulary Image -->
-                                        <Image Source="{Binding ImageUrl}" 
-                                               Width="50" 
-                                               Height="50" 
-                                               Margin="10,0,0,0"/>
-
-                                        <!-- Vocabulary Audio -->
-                                        <MediaElement Source="{Binding AudioUrl}" 
-                                                    Width="50" 
-                                                    Height="50" 
-                                                    LoadedBehavior="Manual" 
-                                                    UnloadedBehavior="Stop"
-                                                    Margin="10,0,0,0"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Grid.Column="0" Source="{Binding ImageUrl}" Width="40" Height="40"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Word}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Meaning}" VerticalAlignment="Center"/>
+                                <MediaElement Grid.Column="3" Source="{Binding AudioUrl}" LoadedBehavior="Manual" Width="30"/>
+                            </Grid>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </ScrollViewer>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Grid>
+
+        <!-- Action Bar -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <Button Content="Mark as Completed" 
+                    Command="{Binding MarkLessonCompletedCommand}"
+                    CommandParameter="{Binding SelectedLesson.Id}"
+                    Visibility="{Binding SelectedLesson, Converter={StaticResource NullToVisibilityConverter}}"
+                    Margin="0,0,10,0"/>
+            <Button Content="Refresh" Command="{Binding LoadLessonsCommand}"/>
+        </StackPanel>
     </Grid>
 </Page> 

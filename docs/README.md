@@ -14,11 +14,16 @@ KumanoKodo/
 │   ├── QuizPage.xaml      # Interactive quiz interface
 │   └── ProgressPage.xaml  # Learning progress tracking
 ├── ViewModels/            # MVVM view models
+│   ├── MainViewModel.cs   # Main window logic
+│   ├── LessonsViewModel.cs # Lesson management
+│   ├── QuizViewModel.cs   # Quiz interaction
+│   └── ProgressViewModel.cs # Progress tracking
 ├── Models/                # Data models
 ├── Services/              # External services
 │   └── AzureBlobService.cs # Azure Blob Storage integration
 ├── Converters/            # WPF value converters
 └── DataAccess.cs          # Database access layer
+└── Directory.Packages.props # Central package version management
 ```
 
 ## Database Schema
@@ -266,15 +271,57 @@ The quiz system implements a sophisticated spaced repetition algorithm:
 
 ## Getting Started
 
-1. Clone the repository
-2. Open the solution in Visual Studio
-3. Install required NuGet packages:
-   - Azure.Storage.Blobs (12.24.0)
-4. Configure Azure Blob Storage:
+1. Prerequisites:
+   - .NET 8.0 SDK or later
+   - Visual Studio 2022 or later with .NET 8.0 workload
+
+2. Clone the repository
+
+3. Open the solution in Visual Studio
+
+4. Install required NuGet packages:
+   - Azure.Storage.Blobs (12.19.1)
+   - Microsoft.Data.Sqlite (8.0.2)
+   - Microsoft.Extensions.Configuration (8.0.0)
+   - Microsoft.Extensions.Configuration.Binder (8.0.4)
+   - Microsoft.Extensions.Configuration.Json (8.0.0)
+   - Microsoft.Extensions.Configuration.EnvironmentVariables (8.0.0)
+   - Microsoft.Extensions.DependencyInjection (8.0.0)
+
+5. Configure Azure Blob Storage:
    - Add connection string to app settings
    - Create container named 'kumano-assets'
-5. Build and run the application
-6. The database will be automatically initialized in the `database` folder
+
+6. Build and run the application:
+   ```powershell
+   dotnet restore
+   dotnet clean
+   dotnet build
+   dotnet run
+   ```
+
+7. The database will be automatically initialized in the `database` folder
+
+## Development Environment
+
+### Required Tools
+- .NET 8.0 SDK
+- Visual Studio 2022 or later
+- Azure Storage Explorer (optional, for managing blob storage)
+
+### Project Configuration
+- Target Framework: .NET 8.0
+- WPF Application
+- Nullable Reference Types enabled
+- Implicit Usings enabled
+
+### Key Features
+- Modern .NET 8.0 features and improvements
+- WPF with MVVM architecture
+- SQLite database with Entity Framework Core
+- Azure Blob Storage integration
+- Configuration management with Microsoft.Extensions.Configuration
+- Dependency injection support
 
 ## Contributing
 
@@ -286,4 +333,60 @@ The quiz system implements a sophisticated spaced repetition algorithm:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## ViewModels
+
+### LessonsViewModel
+- Manages lesson content and vocabulary
+- Properties:
+  - `Lessons`: Collection of available lessons
+  - `SelectedLesson`: Currently selected lesson
+  - `VocabularyList`: Words for current lesson
+  - `IsLoading`: Loading state indicator
+  - `StatusMessage`: User feedback
+- Commands:
+  - `LoadLessonsCommand`: Refresh lesson list
+  - `LoadVocabularyCommand`: Load words for selected lesson
+  - `MarkLessonCompletedCommand`: Update lesson progress
+
+### ProgressViewModel
+- Tracks user learning progress
+- Properties:
+  - `LessonProgress`: Completed lesson history
+  - `QuizProgress`: Quiz attempt history
+  - `ProgressMapUrl`: Visual progress representation
+  - `CompletedLessons`: Number of finished lessons
+  - `TotalLessons`: Total available lessons
+  - `CorrectQuizzes`: Successful quiz attempts
+  - `TotalQuizzes`: Total quiz attempts
+- Commands:
+  - `LoadProgressCommand`: Initialize progress data
+  - `RefreshProgressCommand`: Update progress display
+
+## Package Management
+
+The project uses centralized package version management through `Directory.Packages.props`:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+</Project>
+```
+
+To verify package versions:
+```powershell
+dotnet list package
+``` 
