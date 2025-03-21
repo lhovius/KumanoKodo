@@ -11,6 +11,7 @@
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <converters:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
         <converters:AnswerButtonBackgroundConverter x:Key="AnswerButtonBackgroundConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
 
         <Style x:Key="NavigationButton" TargetType="Button">
             <Setter Property="Background" Value="#4CAF50"/>

@@ -137,4 +137,46 @@ The quiz system implements a sophisticated spaced repetition algorithm:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Package Management
+
+The project uses centralized package version management through `Directory.Packages.props`. This ensures consistent package versions across all projects in the solution.
+
+### Key Features
+- All package versions are managed in `Directory.Packages.props`
+- No version numbers in individual `.csproj` files
+- Transitive package pinning enabled for better dependency management
+- Centralized version control for all NuGet packages
+
+### Package Versions
+The following packages are used in the project:
+
+- **Core Framework**
+  - Microsoft.Data.Sqlite (8.0.2)
+  - Microsoft.Extensions.Configuration (8.0.0)
+  - Microsoft.Extensions.DependencyInjection (8.0.0)
+  - Microsoft.Extensions.Logging (8.0.0)
+
+- **UI and MVVM**
+  - CommunityToolkit.Mvvm (8.2.2)
+  - WPF (built-in)
+
+- **PDF Processing**
+  - iText7 (8.0.2)
+
+- **Logging**
+  - Serilog (3.1.1)
+  - Serilog.Sinks.File (5.0.0)
+
+### Adding New Packages
+When adding new packages:
+1. Add the package reference to the project's `.csproj` file without version
+2. Add the package version to `Directory.Packages.props`
+3. Run `dotnet restore` to update dependencies
+
+### Version Management Best Practices
+- Keep package versions up to date
+- Use compatible versions across related packages
+- Test thoroughly after version updates
+- Document any breaking changes 

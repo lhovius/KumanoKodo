@@ -136,3 +136,96 @@ END
 - `NextReviewDate`: Calculated based on performance
   - For correct answers: LastAttempted + (2^ReviewCount) days
   - For incorrect answers: LastAttempted + 1 hour 
+
+## Tables
+
+### Lessons
+- `LessonId` (PK) - INTEGER PRIMARY KEY
+- `Title` - TEXT
+- `Description` - TEXT
+- `Order` - INTEGER
+- `ImageUrl` - TEXT
+- `AudioUrl` - TEXT
+- `IsCompleted` - INTEGER (0/1)
+
+### Vocabulary
+- `VocabularyId` (PK) - INTEGER PRIMARY KEY
+- `LessonId` (FK) - INTEGER
+- `Kanji` - TEXT
+- `Pronunciation` - TEXT (Hiragana/Katakana)
+- `Romaaji` - TEXT
+- `Meaning` - TEXT
+- `ImageUrl` - TEXT
+- `AudioUrl` - TEXT
+- FOREIGN KEY (`LessonId`) REFERENCES `Lessons`(`LessonId`)
+
+### Sentences
+- `SentenceId` (PK) - INTEGER PRIMARY KEY
+- `LessonId` (FK) - INTEGER
+- `Kanji` - TEXT
+- `Pronunciation` - TEXT (Hiragana/Katakana)
+- `Romaaji` - TEXT
+- `Translation` - TEXT
+- `AudioUrl` - TEXT
+- FOREIGN KEY (`LessonId`) REFERENCES `Lessons`(`LessonId`)
+
+### GrammarTopics
+- `GrammarId` (PK) - INTEGER PRIMARY KEY
+- `LessonId` (FK) - INTEGER
+- `Title` - TEXT
+- `PDF_Link` - TEXT
+- FOREIGN KEY (`LessonId`) REFERENCES `Lessons`(`LessonId`)
+
+### Quizzes
+- `QuizId` (PK) - INTEGER PRIMARY KEY
+- `LessonId` (FK) - INTEGER
+- `Question` - TEXT
+- `CorrectAnswer` - TEXT
+- `Options` - TEXT (JSON array)
+- `ImageUrl` - TEXT
+- `AudioUrl` - TEXT
+- FOREIGN KEY (`LessonId`) REFERENCES `Lessons`(`LessonId`)
+
+### UserProgress
+- `ProgressId` (PK) - INTEGER PRIMARY KEY
+- `UserId` (FK) - INTEGER
+- `LessonId` (FK) - INTEGER
+- `CompletedDate` - TEXT
+- `ProgressImageUrl` - TEXT
+- FOREIGN KEY (`UserId`) REFERENCES `Users`(`UserId`)
+- FOREIGN KEY (`LessonId`) REFERENCES `Lessons`(`LessonId`)
+
+### QuizAttempts
+- `AttemptId` (PK) - INTEGER PRIMARY KEY
+- `UserId` (FK) - INTEGER
+- `QuizId` (FK) - INTEGER
+- `IsCorrect` - INTEGER (0/1)
+- `AttemptDate` - TEXT
+- `NextReviewDate` - TEXT
+- FOREIGN KEY (`UserId`) REFERENCES `Users`(`UserId`)
+- FOREIGN KEY (`QuizId`) REFERENCES `Quizzes`(`QuizId`)
+
+### Users
+- `UserId` (PK) - INTEGER PRIMARY KEY
+- `Username` - TEXT UNIQUE
+- `PasswordHash` - TEXT
+- `Email` - TEXT UNIQUE
+- `CreatedDate` - TEXT
+
+## Data Sources and Licensing
+
+### Marugoto Materials
+The application uses vocabulary and sentences from the Marugoto Japanese Language and Culture Starter A1 course materials:
+- Vocabulary: MarugotoStarterActivitiesVocabularyIndex2_EN.pdf
+- Sentences: MarugotoStarterActivitiesPhraseIndex.pdf
+- Grammar: MarugotoStarterActivitiesGrammarIndex.pdf
+
+**Important Note**: These materials must be downloaded manually by users. The application does not include or distribute the PDF files directly.
+
+### Media Storage
+All media files (images, audio) are stored in Azure Blob Storage with the following structure:
+- Lessons: `lessons/{lessonId}.{extension}`
+- Vocabulary: `vocabulary/{vocabularyId}.{extension}`
+- Sentences: `sentences/{sentenceId}.{extension}`
+- Progress: `progress/{userId}/{lessonId}.{extension}`
+- Quiz: `quiz/{quizId}.{extension}` 

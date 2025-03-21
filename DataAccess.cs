@@ -1,23 +1,41 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Windows;
+using KumanoKodo.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace KumanoKodo;
 
-public class DataAccess
+public interface IDataAccess
+{
+    void InitializeDatabase();
+    SqliteConnection CreateConnection();
+    Task<List<QuizQuestion>> GetQuizQuestionsAsync(int userId, int lessonId, int count = 10);
+    Task RecordQuizAttemptAsync(int userId, int quizId, bool wasCorrect);
+    Task InsertVocabularyAsync(List<VocabularyData> vocabulary);
+    Task InsertSentencesAsync(List<SentenceData> sentences);
+    Task InsertGrammarTopicsAsync(List<GrammarTopicData> grammarTopics);
+    Task<List<GrammarTopicData>> GetGrammarTopicsAsync(int lessonId);
+    Task InsertLessonAsync(int lessonId, string? title, string? description);
+}
+
+public class DataAccess : IDataAccess
 {
     private readonly string _dbPath;
     private readonly string _connectionString;
+    private readonly IConfiguration _configuration;
 
-    public DataAccess()
+    public DataAccess(IConfiguration configuration)
     {
+        _configuration = configuration;
         string projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
-        _dbPath = Path.Combine(projectRoot, "database", "kumano_kodo.db");
+        string dbPath = _configuration.GetValue<string>("Database:Path") ?? "database/kumano_kodo.db";
+        _dbPath = Path.Combine(projectRoot, dbPath);
         _connectionString = $"Data Source={_dbPath}";
         InitializeDatabase();
     }
 
-    public void InitializeDatabase()
+    public virtual void InitializeDatabase()
     {
         // Ensure the database directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
@@ -49,7 +67,7 @@ public class DataAccess
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Lessons (
                     Id INTEGER PRIMARY KEY,
-                    Title TEXT NOT NULL,
+                    Title TEXT,
                     Description TEXT
                 )";
             command.ExecuteNonQuery();
@@ -61,10 +79,13 @@ public class DataAccess
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Vocabulary (
                     Id INTEGER PRIMARY KEY,
-                    Word TEXT NOT NULL,
+                    LessonId INTEGER NOT NULL,
+                    Kanji TEXT,
+                    Pronunciation TEXT NOT NULL,
+                    Romaaji TEXT NOT NULL,
                     Meaning TEXT NOT NULL,
-                    LessonId INTEGER,
-                    FOREIGN KEY(LessonId) REFERENCES Lessons(Id)
+                    FOREIGN KEY(LessonId) REFERENCES Lessons(Id),
+                    UNIQUE(LessonId, Pronunciation, Romaaji, Meaning)
                 )";
             command.ExecuteNonQuery();
         }
@@ -124,13 +145,13 @@ public class DataAccess
         }
     }
 
-    public SqliteConnection CreateConnection()
+    public virtual SqliteConnection CreateConnection()
     {
         return new SqliteConnection(_connectionString);
     }
 
     // Quiz-related methods
-    public async Task<List<QuizQuestion>> GetQuizQuestionsAsync(int userId, int lessonId, int count = 10)
+    public virtual async Task<List<QuizQuestion>> GetQuizQuestionsAsync(int userId, int lessonId, int count = 10)
     {
         var questions = new List<QuizQuestion>();
         using var connection = CreateConnection();
@@ -194,7 +215,7 @@ public class DataAccess
         return questions;
     }
 
-    public async Task RecordQuizAttemptAsync(int userId, int quizId, bool wasCorrect)
+    public virtual async Task RecordQuizAttemptAsync(int userId, int quizId, bool wasCorrect)
     {
         using var connection = CreateConnection();
         await connection.OpenAsync();
@@ -225,6 +246,170 @@ public class DataAccess
         command.Parameters.AddWithValue("@QuizId", quizId);
         command.Parameters.AddWithValue("@LastAttempted", DateTime.UtcNow);
         command.Parameters.AddWithValue("@Correct", wasCorrect);
+
+        await command.ExecuteNonQueryAsync();
+    }
+
+    public virtual async Task InsertVocabularyAsync(List<VocabularyData> vocabulary)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            // First, verify that all lesson IDs exist
+            var lessonIds = vocabulary.Select(v => v.LessonId).Distinct();
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = @"
+                    SELECT COUNT(*) FROM Lessons WHERE Id IN (" + string.Join(",", lessonIds) + ")";
+                var count = Convert.ToInt32(await command.ExecuteScalarAsync());
+                if (count != lessonIds.Count())
+                {
+                    throw new InvalidOperationException("Some lesson IDs do not exist in the Lessons table");
+                }
+            }
+
+            // Insert vocabulary with duplicate handling
+            foreach (var item in vocabulary)
+            {
+                using var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = @"
+                    INSERT INTO Vocabulary (LessonId, Kanji, Pronunciation, Romaaji, Meaning)
+                    VALUES (@LessonId, @Kanji, @Pronunciation, @Romaaji, @Meaning)
+                    ON CONFLICT(LessonId, Pronunciation, Romaaji, Meaning) DO NOTHING";
+
+                command.Parameters.AddWithValue("@LessonId", item.LessonId);
+                command.Parameters.AddWithValue("@Kanji", (object?)item.Kanji ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Pronunciation", item.Pronunciation);
+                command.Parameters.AddWithValue("@Romaaji", item.Romaaji);
+                command.Parameters.AddWithValue("@Meaning", item.Meaning);
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public virtual async Task InsertSentencesAsync(List<SentenceData> sentences)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            foreach (var item in sentences)
+            {
+                using var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = @"
+                    INSERT INTO Sentences (LessonId, Kanji, Pronunciation, Romaaji, Translation)
+                    VALUES (@LessonId, @Kanji, @Pronunciation, @Romaaji, @Translation)";
+
+                command.Parameters.AddWithValue("@LessonId", item.LessonId);
+                command.Parameters.AddWithValue("@Kanji", item.Kanji);
+                command.Parameters.AddWithValue("@Pronunciation", item.Pronunciation);
+                command.Parameters.AddWithValue("@Romaaji", item.Romaaji);
+                command.Parameters.AddWithValue("@Translation", item.Translation);
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public virtual async Task InsertGrammarTopicsAsync(List<GrammarTopicData> grammarTopics)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            foreach (var item in grammarTopics)
+            {
+                using var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = @"
+                    INSERT INTO GrammarTopics (LessonId, Title, PDF_Link)
+                    VALUES (@LessonId, @Title, @PDF_Link)";
+
+                command.Parameters.AddWithValue("@LessonId", item.LessonId);
+                command.Parameters.AddWithValue("@Title", item.Title);
+                command.Parameters.AddWithValue("@PDF_Link", item.PDF_Link);
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public virtual async Task<List<GrammarTopicData>> GetGrammarTopicsAsync(int lessonId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT GrammarId, LessonId, Title, PDF_Link
+            FROM GrammarTopics
+            WHERE LessonId = @LessonId
+            ORDER BY Title";
+
+        command.Parameters.AddWithValue("@LessonId", lessonId);
+
+        var topics = new List<GrammarTopicData>();
+        using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            topics.Add(new GrammarTopicData
+            {
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                LessonId = reader.GetInt32(reader.GetOrdinal("LessonId")),
+                PDF_Link = reader.GetString(reader.GetOrdinal("PDF_Link"))
+            });
+        }
+
+        return topics;
+    }
+
+    public virtual async Task InsertLessonAsync(int lessonId, string? title, string? description)
+    {
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO Lessons (Id, Title, Description)
+            VALUES (@Id, @Title, @Description)
+            ON CONFLICT(Id) DO NOTHING";
+
+        command.Parameters.AddWithValue("@Id", lessonId);
+        command.Parameters.AddWithValue("@Title", (object?)title ?? DBNull.Value);
+        command.Parameters.AddWithValue("@Description", (object?)description ?? DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
     }

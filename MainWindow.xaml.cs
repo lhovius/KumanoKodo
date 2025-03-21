@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using KumanoKodo.Views;
+using KumanoKodo.ViewModels;
 
 namespace KumanoKodo;
 
@@ -16,9 +18,10 @@ namespace KumanoKodo;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
     }
 
     private void QuizButton_Click(object sender, RoutedEventArgs e)
